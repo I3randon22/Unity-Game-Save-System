@@ -7,22 +7,24 @@ using System;
 using UnityEngine.Android;
 using Newtonsoft.Json;
 
+// Static class for handling saving and loading game data
 public static class SaveSystem
 {
+    // Save the player data to a file
     public static void Save(PlayerData data)
     {
         try
         {
+            // Convert PlayerData to JSON format
             string jsonData = JsonUtility.ToJson(data, true);
 
+            // Write JSON data to a file
             using (FileStream stream = new FileStream(GetPath(), FileMode.Create))
             {
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     writer.Write(jsonData);
                 }
-
-                stream.Close();
             }
 
             Debug.Log("Saved Game");
@@ -30,18 +32,21 @@ public static class SaveSystem
         catch (Exception e)
         {
             Debug.LogException(e);
-            Debug.LogError("Error occured when trying to save the data to a file: " + GetPath());
+            Debug.LogError("Error occurred when trying to save the data to a file: " + GetPath());
         }
     }
 
+    // Load player data from a file
     public static PlayerData Load()
     {
         PlayerData data = null;
 
         try
         {
+            // Check if the save file exists
             if (File.Exists(GetPath()))
             {
+                // Read JSON data from the file
                 string jsonData = "";
                 using (FileStream stream = new FileStream(GetPath(), FileMode.Open))
                 {
@@ -51,6 +56,7 @@ public static class SaveSystem
                     }
                 }
 
+                // Convert JSON data to PlayerData object
                 data = JsonUtility.FromJson<PlayerData>(jsonData);
                 Debug.Log(GetPath());
                 Debug.Log("Save Loaded");
@@ -64,16 +70,15 @@ public static class SaveSystem
         catch (Exception e)
         {
             Debug.LogException(e);
-            Debug.LogError("Error occured when trying to load the data from file: " + GetPath());
+            Debug.LogError("Error occurred when trying to load the data from file: " + GetPath());
         }
 
         return data;
     }
 
-
+    // Check and request necessary permissions for writing to external storage
     public static void CheckPermissions()
     {
-        // Request permission to write to external storage
         if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageWrite))
         {
             Permission.RequestUserPermission(Permission.ExternalStorageWrite);
@@ -84,19 +89,22 @@ public static class SaveSystem
         }
     }
 
+    // Create a new save with default data
     public static PlayerData NewSave()
     {
-        PlayerData emptyData = new PlayerData();
-        GameEvents.instance.NewGame();
+        //PlayerData emptyData = new PlayerData();  Create new data
+        //GameEvents.instance.NewGame();  //Start new game
         Debug.Log("New Save Created");
         return emptyData;
     }
 
+    // Check if a save file exists
     public static bool SaveExists()
     {
         return File.Exists(GetPath());
     }
 
+    // Get the path for saving and loading data
     private static string GetPath()
     {
         if (Application.isEditor)
@@ -109,6 +117,7 @@ public static class SaveSystem
         }
     }
 
+    // Serialize a list of ScriptableObjects to a JSON string
     public static string SerializeSOList<T>(List<T> SO_List)
     {
         string result = "";
@@ -119,6 +128,7 @@ public static class SaveSystem
         return result;
     }
 
+    // Deserialize a JSON string to a list of ScriptableObjects
     public static List<T> DeserializeSOList<T>(string json_string)
     {
         string[] stringSeparators = new string[] { "}," };
@@ -134,6 +144,4 @@ public static class SaveSystem
         }
         return result;
     }
-
-   
 }
